@@ -33,6 +33,19 @@ target_link_options(
 # compiling for different CPU extensions for Arm64 (aarch64)
 # See docs/build_arm_flags.md for more details
 
+# Build the common library as a static library
+add_library(llama-common-lib STATIC
+    ${COMMON_DIR}/common.cpp
+    ${COMMON_DIR}/chat.cpp
+)
+target_include_directories(
+    llama-common-lib
+    PUBLIC
+    ${COMMON_DIR}
+    ${GGML_DIR}/include
+    ${LLAMA_DIR}/include
+)
+
 function(build_library target_name)
     add_library(
             ${target_name}
@@ -66,7 +79,7 @@ function(build_library target_name)
     )
     target_link_libraries(
             ${target_name}
-            android log llama-common llama vulkan
+            android log llama-common-lib llama vulkan
     )
     # -Wl,--gc-sections: remove unused sections (garbage collection)
     # -flto: link-time optimization
