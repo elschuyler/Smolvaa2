@@ -33,17 +33,21 @@ target_link_options(
 # compiling for different CPU extensions for Arm64 (aarch64)
 # See docs/build_arm_flags.md for more details
 
-# Build the common library as a static library
-add_library(llama-common-lib STATIC
-    ${COMMON_DIR}/common.cpp
-    ${COMMON_DIR}/chat.cpp
-)
+# Build the common library from all sources in the llama.cpp/common directory
+file(GLOB LLAMA_COMMON_SOURCES "${COMMON_DIR}/*.c" "${COMMON_DIR}/*.cpp")
+add_library(llama-common-lib STATIC ${LLAMA_COMMON_SOURCES})
 target_include_directories(
     llama-common-lib
     PUBLIC
     ${COMMON_DIR}
     ${GGML_DIR}/include
     ${LLAMA_DIR}/include
+)
+# Apply similar compile options to common lib to avoid visibility/linker issues
+target_compile_options(
+    llama-common-lib
+    PUBLIC
+    -fvisibility=hidden -fvisibility-inlines-hidden -ffunction-sections -fdata-sections
 )
 
 function(build_library target_name)
